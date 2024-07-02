@@ -1,45 +1,75 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-// This is a stateless widget that uses hooks for state management
+/*
+class Example2WithStatefullApproach extends StatefulWidget {
+  const Example2WithStatefullApproach({super.key});
+
+  @override
+  State<Example2WithStatefullApproach> createState() => _Example2WithStatefullApproachState();
+}
+
+class _Example2WithStatefullApproachState extends State<Example2WithStatefullApproach> {
+  Timer? timer;
+  int counter = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      setState(() {
+        counter = t.tick;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Example 2'),
+      ),
+      body: Center(
+        child: Text(counter.toString()),
+      ),
+    );
+  }
+}
+*/
+
+// The same code as above with hooks approach
+
 class Example2 extends HookWidget {
   const Example2({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Create a TextEditingController using a hook. The controller is reused across rebuilds.
-    final controller = useTextEditingController();
-    // Create a piece of state to hold the trimmed text. The state is managed by the useState hook.
-    final text = useState('');
+    final counter = useState(0);
 
-    // useEffect is used to run side effects, like adding event listeners.
-    // It runs when the widget is first built and when dependencies change.
+    // like initState, useEffect will be performed once
+    // if one if the keys in the list (second param) changed, then useEffect will run again
     useEffect(() {
-      // Add a listener to the controller to update the text state whenever the text in the TextField changes.
-      controller.addListener(() {
-        // Update the text state with the trimmed text from the controller.
-        text.value = controller.text.trim();
+      debugPrint('Hello from useEffect'); // will be printed once
+      final timer = Timer.periodic(const Duration(seconds: 1), (t) {
+        counter.value = t.tick;
       });
-
-      // Return null as no cleanup is needed in this case. 
-      // If we needed to remove the listener, we would return a cleanup function here.
-      return null;
-    }, [controller]); // Dependency array, ensuring the effect runs only when the controller changes.
+      return timer.cancel; // dispose the timer (like dispose above)
+    }, []);
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Example 2'),
+      ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // TextField widget uses the controller created by the useTextEditingController hook.
-            TextField(
-              controller: controller,
-            ),
-            // Display the current value of the text state
-            // which updates whenever the text in the TextField changes.
-            Text(text.value),
-          ],
-        ),
+        child: Text(counter.value.toString()),
       ),
     );
   }
